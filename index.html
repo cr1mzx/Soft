@@ -1,615 +1,536 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="https://avatars.githubusercontent.com/u/87567822?v=4">
-  <title>ПК Софт</title>
+  <title>ПК Софт — Быстрый доступ к скачиванию</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+            },
+            dark: {
+              bg: '#0b0f17',
+              card: '#161e2e',
+              hover: '#1e293b',
+              border: '#26334d'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
   <style>
-    :root {
-      --bg-color: #0f172a;
-      --card-bg: #1e293b;
-      --card-hover: #334155;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --accent: #38bdf8;
-      --border-color: #334155;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      padding: 40px 20px;
-      display: flex;
-      justify-content: center;
+      background-color: #0b0f17;
+      color: #f8fafc;
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    .container {
-      width: 100%;
-      max-width: 800px;
-    }
-
-    header {
-      text-align: center;
-      margin-bottom: 40px;
-    }
-
-    header h1 {
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-      color: var(--accent);
-    }
-
-    header p {
-      color: var(--text-muted);
-      font-size: 1.1rem;
-    }
-
-    .category {
-      margin-bottom: 20px;
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
+    /* Category Collapsible Smooth JS Container */
+    .category-content-wrapper {
+      transition: height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
       overflow: hidden;
-      background-color: rgba(30, 41, 59, 0.5);
+      will-change: height, opacity;
     }
 
-    .category-header {
-      padding: 18px 24px;
-      background-color: var(--card-bg);
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      user-select: none;
-      transition: background-color 0.2s;
+    .category-content-wrapper.collapsed {
+      height: 0 !important;
+      opacity: 0;
+      pointer-events: none;
     }
 
-    .category-header:hover {
-      background-color: var(--card-hover);
+    /* Chevron rotation */
+    .chevron-icon {
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-
-    .category-title {
-      font-size: 1.25rem;
-      font-weight: 600;
-    }
-
-    .chevron {
-      width: 20px;
-      height: 20px;
-      fill: var(--text-muted);
-      transition: transform 0.3s ease;
-    }
-
-    .category.collapsed .chevron {
+    .collapsed .chevron-icon {
       transform: rotate(-90deg);
     }
 
-    .category-content {
+    /* Custom card grid responsive adjustments */
+    .app-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 16px;
-      padding: 20px;
-      transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
-      max-height: 2000px;
-      opacity: 1;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 0.75rem;
     }
 
-    .category.collapsed .category-content {
-      max-height: 0;
-      opacity: 0;
-      padding-top: 0;
-      padding-bottom: 0;
-      overflow: hidden;
+    @media (max-width: 520px) {
+      .app-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
-    .app-card {
-      display: flex;
-      align-items: center;
-      background-color: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 14px 18px;
-      text-decoration: none;
-      color: var(--text-main);
-      transition: all 0.2s ease;
+    /* Glassmorphism subtle effects */
+    .glass-card {
+      background: rgba(22, 30, 46, 0.75);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(38, 51, 77, 0.8);
     }
 
-    .app-card:hover {
-      background-color: var(--card-hover);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-      border-color: var(--accent);
+    .glass-card:hover {
+      background: rgba(30, 41, 59, 0.9);
+      border-color: rgba(56, 189, 248, 0.4);
     }
 
-    .app-icon {
-      width: 42px;
-      height: 42px;
-      object-fit: contain;
-      margin-right: 16px;
-      flex-shrink: 0;
-      background-color: transparent;
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
     }
-
-    .app-name {
-      font-size: 1rem;
-      font-weight: 500;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+    ::-webkit-scrollbar-track {
+      background: #0b0f17;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
     }
   </style>
 </head>
-<body>
+<body class="p-4 sm:p-6 md:p-10 flex justify-center">
 
-  <div class="container">
-    <header>
-      <h1>ПК Софт</h1>
-      <p>Быстрый доступ к скачиванию программ</p>
+  <div class="w-full max-w-4xl space-y-6">
+    
+    <!-- Header -->
+    <header class="text-center space-y-2 py-4">
+      <div class="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs sm:text-sm font-medium mb-1">
+        <span>⚡ Каталог быстрого доступа</span>
+      </div>
+      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white flex items-center justify-center gap-2">
+        <span class="bg-gradient-to-r from-brand-400 to-sky-200 bg-clip-text text-transparent">ПК Софт</span>
+      </h1>
+      <p class="text-slate-400 text-sm sm:text-base max-w-md mx-auto">
+        Проверенные ссылки на официальные дистрибутивы и полезные программы
+      </p>
     </header>
 
-    <div id="catalog"></div>
+    <!-- Toolbar: Search & Action Buttons -->
+    <div class="flex flex-col sm:flex-row gap-3 items-center justify-between">
+      <!-- Search Input -->
+      <div class="relative w-full sm:w-80">
+        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </div>
+        <input 
+          type="text" 
+          id="searchInput" 
+          placeholder="Поиск программы..." 
+          class="w-full pl-10 pr-9 py-2.5 bg-dark-card border border-dark-border rounded-xl text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-400/50 focus:border-brand-400 transition-all duration-200 shadow-sm"
+        >
+        <button id="clearSearch" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+        <button 
+          id="expandAllBtn" 
+          class="flex-1 sm:flex-none px-3.5 py-2 text-xs font-semibold text-slate-300 bg-dark-card border border-dark-border hover:bg-slate-800 rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 13l-7 7-7-7m14-8l-7 7-7-7"/></svg>
+          Раскрыть все
+        </button>
+        <button 
+          id="collapseAllBtn" 
+          class="flex-1 sm:flex-none px-3.5 py-2 text-xs font-semibold text-slate-300 bg-dark-card border border-dark-border hover:bg-slate-800 rounded-xl transition-all duration-200 flex items-center justify-center gap-1.5"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11l7-7 7 7M5 19l7-7 7 7"/></svg>
+          Свернуть все
+        </button>
+      </div>
+    </div>
+
+    <!-- Catalog Container -->
+    <div id="catalog" class="space-y-4"></div>
+
+    <!-- Empty Search Results State -->
+    <div id="noResults" class="hidden text-center py-12 space-y-3">
+      <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-800 text-slate-400">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 9.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      </div>
+      <p class="text-slate-300 font-medium">Ничего не найдено</p>
+      <p class="text-slate-500 text-sm">Попробуйте изменить поисковый запрос</p>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center pt-6 pb-2 text-xs text-slate-500 border-t border-dark-border/50">
+      <p>ПК Софт &copy; 2026. Все ссылки ведут на официальные ресурсы разработчиков.</p>
+    </footer>
+
   </div>
 
   <script>
+    // Full Application Dataset
     const catalogData = [
       {
         categoryName: "Браузеры",
         defaultOpen: true,
         apps: [
-          {
-            name: "Helium",
-            icon: "https://helium.computer/icon/helium-app-icon.svg",
-            url: "https://helium.computer"
-          },
-          {
-            name: "Mozilla Firefox",
-            icon: "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a0/Firefox_logo%2C_2019.svg/1280px-Firefox_logo%2C_2019.svg.png",
-            url: "https://www.firefox.com/ru/download/all/desktop-release/win64/ru"
-          },
-          {
-            name: "Google Chrome",
-            icon: "https://www.google.com/chrome/static/images/chrome-logo-m100.svg",
-            url: "https://www.google.com/chrome"
-          },
+          { name: "Helium", icon: "https://helium.computer/icon/helium-app-icon.svg", url: "https://helium.computer" },
+          { name: "Mozilla Firefox", icon: "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a0/Firefox_logo%2C_2019.svg/1280px-Firefox_logo%2C_2019.svg.png", url: "https://www.firefox.com/ru/download/all/desktop-release/win64/ru" },
+          { name: "Google Chrome", icon: "https://www.google.com/chrome/static/images/chrome-logo-m100.svg", url: "https://www.google.com/chrome" }
         ]
       },
       {
         categoryName: "Утилиты",
         defaultOpen: true,
         apps: [
-          {
-            name: "7-Zip",
-            icon: "https://www.7-zip.org/7ziplogo.png",
-            url: "https://www.7-zip.org"
-          },
-          {
-            name: "WinRAR",
-            icon: "https://www.win-rar.com/partners/affiliates/images/screenshots/winrarbanner03.png",
-            url: "https://www.rarlab.com/download.htm"
-          },
-          {
-            name: "ShareX",
-            icon: "https://getsharex.com/img/ShareX_Logo_120.png",
-            url: "https://getsharex.com"
-          },
-          {
-            name: "qBittorrent",
-            icon: "https://www.qbittorrent.org/favicon.ico",
-            url: "https://www.qbittorrent.org/download"
-          },
-          {
-            name: "LocalSend",
-            icon: "https://localsend.org/img/logo.png",
-            url: "https://localsend.org/ru"
-          },
-          {
-            name: "KeePassXC",
-            icon: "https://avatars.githubusercontent.com/u/22534815?s=60&v=4",
-            url: "https://github.com/keepassxreboot/keepassxc"
-          },
-          {
-            name: "NPP",
-            icon: "https://avatars.githubusercontent.com/u/12589084?s=60&v=4",
-            url: "https://github.com/notepad-plus-plus/notepad-plus-plus"
-          },
-          {
-            name: "Revo Uninstaller",
-            icon: "https://upload.wikimedia.org/wikipedia/commons/8/83/Revouninstallerpro_icon.png",
-            url: "https://t.me/cr1mztg/16"
-          },
-          {
-            name: "RegOrganizer",
-            icon: "https://images-eds-ssl.xboxlive.com/image?url=4rt9.lXDC4H_93laV1_eHHFT949fUipzkiFOBH3fAiZZUCdYojwUyX2aTonS1aIwMrx6NUIsHfUHSLzjGJFxxgctBe1PmZ8t1NL3PijYkXlQxMy_OYm70Ha.EP9qZjvBkti_mmo5lt.rvMRjCXchiuhU1P1liptD8BgFrM.4PaQ-&format=source",
-            url: "https://t.me/cr1mztg/18"
-          },
-          {
-            name: "Everything",
-            icon: "https://www.voidtools.com/favicon.ico",
-            url: "https://www.voidtools.com/ru-ru"
-          },
-          {
-            name: "CrystalDiskMark",
-            icon: "https://crystalmark.info/favicon.ico",
-            url: "https://crystalmark.info/en/download/#CrystalDiskMark"
-          },
-          {
-            name: "CrystalDiskInfo",
-            icon: "https://crystalmark.info/favicon.ico",
-            url: "https://crystalmark.info/en/download/#CrystalDiskInfo"
-          },
-          {
-            name: "Ventoy",
-            icon: "https://avatars.githubusercontent.com/u/59477474?s=60&v=4",
-            url: "https://github.com/ventoy/Ventoy"
-          },
-          {
-            name: "Rufus",
-            icon: "https://rufus.ie/favicon.ico",
-            url: "https://rufus.ie/ru"
-          },
-          {
-            name: "FileConverter",
-            icon: "https://github.com/Tichau/FileConverter/raw/refs/heads/integration/Resources/Icons/ApplicationIcon-256x256.ico",
-            url: "https://github.com/Tichau/FileConverter"
-          },
-          {
-            name: "OpenHashTab",
-            icon: "https://img.utdstc.com/icon/8d6/ed8/8d6ed8ec18dc70589fd63b0dafdbf53e4fa8db6aa6ce8dab14716d24a805be06:600",
-            url: "https://t.me/cr1mztg/15"
-          },
-          {
-            name: "ExifTool",
-            icon: "https://exiftool.org/favicon.ico",
-            url: "https://exiftool.org"
-          },
-          {
-            name: "Super Productivity",
-            icon: "https://avatars.githubusercontent.com/u/215719836?s=60&v=4",
-            url: "https://github.com/super-productivity/super-productivity"
-          },
-          {
-            name: "Rainmeter",
-            icon: "https://www.rainmeter.net/favicon.ico",
-            url: "https://www.rainmeter.net"
-          },
-          {
-            name: "WizTree",
-            icon: "https://diskanalyzer.com/favicon.ico",
-            url: "https://diskanalyzer.com/download"
-          },
-          {
-            name: "h2testw",
-            icon: "https://h2testw.org/wp-content/uploads/2023/03/h2testw-logo.png",
-            url: "https://h2testw.org/#download-h2testw"
-          },
-          {
-            name: "Validrive",
-            icon: "https://www.grc.com/validrive/ValiDrive-Icon.png",
-            url: "https://www.grc.com/validrive.htm"
-          },
-          {
-            name: "OCCT",
-            icon: "https://www.ocbase.com/favicon.ico",
-            url: "https://www.ocbase.com"
-          },
-          {
-            name: "HWInfo",
-            icon: "https://www.hwinfo.com/favicon.ico",
-            url: "https://www.hwinfo.com/download"
-          },
-          {
-            name: "AutoHotkey",
-            icon: "https://www.autohotkey.com/favicon.ico",
-            url: "https://www.autohotkey.com"
-          },
-          {
-            name: "RustDesk",
-            icon: "https://avatars.githubusercontent.com/u/71636191?s=60&v=4",
-            url: "https://github.com/rustdesk/rustdesk"
-          },
-          {
-            name: "Razer Synapse",
-            icon: "https://assets2.razerzone.com/images/phoenix/razer-ths-logo.svg",
-            url: "https://www.razer.com/synapse-4"
-          },
-          {
-            name: "TwitchTest",
-            icon: "https://twitch.tv/favicon.ico",
-            url: "https://r1ch.net/projects/twitchtest"
-          },
-          {
-            name: "tbf",
-            icon: "https://twitch.tv/favicon.ico",
-            url: "https://github.com/vyneer/tbf"
-          },
+          { name: "7-Zip", icon: "https://www.7-zip.org/7ziplogo.png", url: "https://www.7-zip.org" },
+          { name: "WinRAR", icon: "https://www.win-rar.com/partners/affiliates/images/screenshots/winrarbanner03.png", url: "https://www.rarlab.com/download.htm" },
+          { name: "ShareX", icon: "https://getsharex.com/img/ShareX_Logo_120.png", url: "https://getsharex.com" },
+          { name: "qBittorrent", icon: "https://www.qbittorrent.org/favicon.ico", url: "https://www.qbittorrent.org/download" },
+          { name: "LocalSend", icon: "https://localsend.org/img/logo.png", url: "https://localsend.org/ru" },
+          { name: "KeePassXC", icon: "https://avatars.githubusercontent.com/u/22534815?s=60&v=4", url: "https://github.com/keepassxreboot/keepassxc" },
+          { name: "NPP", icon: "https://avatars.githubusercontent.com/u/12589084?s=60&v=4", url: "https://github.com/notepad-plus-plus/notepad-plus-plus" },
+          { name: "Revo Uninstaller", icon: "https://upload.wikimedia.org/wikipedia/commons/8/83/Revouninstallerpro_icon.png", url: "https://t.me/cr1mztg/16" },
+          { name: "RegOrganizer", icon: "https://images-eds-ssl.xboxlive.com/image?url=4rt9.lXDC4H_93laV1_eHHFT949fUipzkiFOBH3fAiZZUCdYojwUyX2aTonS1aIwMrx6NUIsHfUHSLzjGJFxxgctBe1PmZ8t1NL3PijYkXlQxMy_OYm70Ha.EP9qZjvBkti_mmo5lt.rvMRjCXchiuhU1P1liptD8BgFrM.4PaQ-&format=source", url: "https://t.me/cr1mztg/18" },
+          { name: "Everything", icon: "https://www.voidtools.com/favicon.ico", url: "https://www.voidtools.com/ru-ru" },
+          { name: "CrystalDiskMark", icon: "https://crystalmark.info/favicon.ico", url: "https://crystalmark.info/en/download/#CrystalDiskMark" },
+          { name: "CrystalDiskInfo", icon: "https://crystalmark.info/favicon.ico", url: "https://crystalmark.info/en/download/#CrystalDiskInfo" },
+          { name: "Ventoy", icon: "https://avatars.githubusercontent.com/u/59477474?s=60&v=4", url: "https://github.com/ventoy/Ventoy" },
+          { name: "Rufus", icon: "https://rufus.ie/favicon.ico", url: "https://rufus.ie/ru" },
+          { name: "FileConverter", icon: "https://github.com/Tichau/FileConverter/raw/refs/heads/integration/Resources/Icons/ApplicationIcon-256x256.ico", url: "https://github.com/Tichau/FileConverter" },
+          { name: "OpenHashTab", icon: "https://img.utdstc.com/icon/8d6/ed8/8d6ed8ec18dc70589fd63b0dafdbf53e4fa8db6aa6ce8dab14716d24a805be06:600", url: "https://t.me/cr1mztg/15" },
+          { name: "ExifTool", icon: "https://exiftool.org/favicon.ico", url: "https://exiftool.org" },
+          { name: "Super Productivity", icon: "https://avatars.githubusercontent.com/u/215719836?s=60&v=4", url: "https://github.com/super-productivity/super-productivity" },
+          { name: "Rainmeter", icon: "https://www.rainmeter.net/favicon.ico", url: "https://www.rainmeter.net" },
+          { name: "WizTree", icon: "https://diskanalyzer.com/favicon.ico", url: "https://diskanalyzer.com/download" },
+          { name: "h2testw", icon: "https://h2testw.org/wp-content/uploads/2023/03/h2testw-logo.png", url: "https://h2testw.org/#download-h2testw" },
+          { name: "Validrive", icon: "https://www.grc.com/validrive/ValiDrive-Icon.png", url: "https://www.grc.com/validrive.htm" },
+          { name: "OCCT", icon: "https://www.ocbase.com/favicon.ico", url: "https://www.ocbase.com" },
+          { name: "HWInfo", icon: "https://www.hwinfo.com/favicon.ico", url: "https://www.hwinfo.com/download" },
+          { name: "AutoHotkey", icon: "https://www.autohotkey.com/favicon.ico", url: "https://www.autohotkey.com" },
+          { name: "RustDesk", icon: "https://avatars.githubusercontent.com/u/71636191?s=60&v=4", url: "https://github.com/rustdesk/rustdesk" },
+          { name: "Razer Synapse", icon: "https://assets2.razerzone.com/images/phoenix/razer-ths-logo.svg", url: "https://www.razer.com/synapse-4" },
+          { name: "TwitchTest", icon: "https://twitch.tv/favicon.ico", url: "https://r1ch.net/projects/twitchtest" },
+          { name: "tbf", icon: "https://twitch.tv/favicon.ico", url: "https://github.com/vyneer/tbf" }
         ]
       },
       {
         categoryName: "Мультимедиа",
         defaultOpen: true,
         apps: [
-          {
-            name: "K-Lite Codec Pack",
-            icon: "https://www.codecguide.com/mpc_logo.png",
-            url: "https://www.codecguide.com/download_kl.htm"
-          },
-          {
-            name: "AIMP",
-            icon: "https://aimp.ru/v2/pages/download/icon-aimp.png",
-            url: "https://aimp.ru/?do=download&os=windows"
-          },
-          {
-            name: "OBS",
-            icon: "https://obsproject.com/assets/images/new_icon_small-r.png",
-            url: "https://obsproject.com"
-          },
-          {
-            name: "yt-dlp",
-            icon: "https://avatars.githubusercontent.com/u/79589310?s=60&v=4",
-            url: "https://github.com/yt-dlp/yt-dlp"
-          },
-          {
-            name: "dlpx",
-            icon: "https://camo.githubusercontent.com/9fbd07251bff411aa804b830b1ef3943e60737b26883f74ee4ce90ec55e42970/68747470733a2f2f692e696d6775722e636f6d2f484339523578362e706e67",
-            url: "https://github.com/cr1mzx/dlpx"
-          },
-          {
-            name: "FFmpeg",
-            icon: "https://ffmpeg.org/favicon.ico",
-            url: "https://www.gyan.dev/ffmpeg/builds"
-          },
-          {
-            name: "TwitchDownloaderWPF",
-            icon: "https://github.com/lay295/TwitchDownloader/raw/master/TwitchDownloaderWPF/Images/Logo.png",
-            url: "https://github.com/lay295/TwitchDownloader"
-          },
-          {
-            name: "LosslessCut",
-            icon: "https://github.com/mifi/lossless-cut/raw/master/src/renderer/src/icon.svg",
-            url: "https://github.com/mifi/lossless-cut"
-          },
-          {
-            name: "Blender",
-            icon: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0c/Blender_logo_no_text.svg/1280px-Blender_logo_no_text.svg.png",
-            url: "https://www.blender.org/download"
-          },
-          {
-            name: "VLC",
-            icon: "https://www.videolan.org/favicon.ico",
-            url: "https://www.videolan.org/vlc/index.html?pStoreID=fedex%27A=0"
-          },
-          {
-            name: "Audacity",
-            icon: "https://avatars.githubusercontent.com/u/11648186?s=60&v=4",
-            url: "https://github.com/audacity/audacity"
-          },
+          { name: "K-Lite Codec Pack", icon: "https://www.codecguide.com/mpc_logo.png", url: "https://www.codecguide.com/download_kl.htm" },
+          { name: "AIMP", icon: "https://aimp.ru/v2/pages/download/icon-aimp.png", url: "https://aimp.ru/?do=download&os=windows" },
+          { name: "OBS", icon: "https://obsproject.com/assets/images/new_icon_small-r.png", url: "https://obsproject.com" },
+          { name: "yt-dlp", icon: "https://avatars.githubusercontent.com/u/79589310?s=60&v=4", url: "https://github.com/yt-dlp/yt-dlp" },
+          { name: "dlpx", icon: "https://camo.githubusercontent.com/9fbd07251bff411aa804b830b1ef3943e60737b26883f74ee4ce90ec55e42970/68747470733a2f2f692e696d6775722e636f6d2f484339523578362e706e67", url: "https://github.com/cr1mzx/dlpx" },
+          { name: "FFmpeg", icon: "https://ffmpeg.org/favicon.ico", url: "https://www.gyan.dev/ffmpeg/builds" },
+          { name: "TwitchDownloaderWPF", icon: "https://github.com/lay295/TwitchDownloader/raw/master/TwitchDownloaderWPF/Images/Logo.png", url: "https://github.com/lay295/TwitchDownloader" },
+          { name: "LosslessCut", icon: "https://github.com/mifi/lossless-cut/raw/master/src/renderer/src/icon.svg", url: "https://github.com/mifi/lossless-cut" },
+          { name: "Blender", icon: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0c/Blender_logo_no_text.svg/1280px-Blender_logo_no_text.svg.png", url: "https://www.blender.org/download" },
+          { name: "VLC", icon: "https://www.videolan.org/favicon.ico", url: "https://www.videolan.org/vlc/index.html?pStoreID=fedex%27A=0" },
+          { name: "Audacity", icon: "https://avatars.githubusercontent.com/u/11648186?s=60&v=4", url: "https://github.com/audacity/audacity" }
         ]
       },
       {
         categoryName: "Общение",
         defaultOpen: true,
         apps: [
-          {
-            name: "Telegram",
-            icon: "https://telegram.org/favicon.ico",
-            url: "https://desktop.telegram.org/"
-          },
-          {
-            name: "Discord",
-            icon: "https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d80db9971f10a9757c99_Symbol.svg",
-            url: "https://discord.com/download"
-          },
+          { name: "Telegram", icon: "https://telegram.org/favicon.ico", url: "https://desktop.telegram.org/" },
+          { name: "Discord", icon: "https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/66e3d80db9971f10a9757c99_Symbol.svg", url: "https://discord.com/download" }
         ]
       },
       {
         categoryName: "Драйвера",
         defaultOpen: true,
         apps: [
-          {
-            name: "NVIDIA Driver",
-            icon: "https://www.nvidia.com/favicon.ico",
-            url: "https://www.nvidia.com/en-eu/geforce/drivers"
-          },  
-          {
-            name: "NVIDIA App",
-            icon: "https://www.nvidia.com/favicon.ico",
-            url: "https://www.nvidia.com/en-eu/software/nvidia-app"
-          },
-          {
-            name: "SDI",
-            icon: "https://sdi.com.ru/favicon.png",
-            url: "https://sdi.com.ru"
-          },
-          {
-            name: "DriverStoreExplorer",
-            icon: "https://github.com/lostindark/DriverStoreExplorer/raw/master/Rapr/icon.ico",
-            url: "https://github.com/lostindark/DriverStoreExplorer"
-          },
-          {
-            name: "DDU",
-            icon: "https://www.wagnardsoft.com/sites/default/files/styles/large/public/field/image/ddu_logo3_17og_46.jpg?itok=57tKrzAJ",
-            url: "https://www.wagnardsoft.com"
-          },
-          {
-            name: "NVCleanstall",
-            icon: "https://tpucdn.com/download/images/133_icon-v1745405913.png",
-            url: "https://www.techpowerup.com/download/techpowerup-nvcleanstall"
-          },
-          {
-            name: "C++ Пакеты",
-            icon: "https://www.microsoft.com/favicon.ico",
-            url: "https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170"
-          },
-          {
-            name: "DirectX SDK 2010",
-            icon: "https://www.microsoft.com/favicon.ico",
-            url: "https://www.microsoft.com/ru-ru/download/details.aspx?id=8109"
-          },
+          { name: "NVIDIA Driver", icon: "https://www.nvidia.com/favicon.ico", url: "https://www.nvidia.com/en-eu/geforce/drivers" },
+          { name: "NVIDIA App", icon: "https://www.nvidia.com/favicon.ico", url: "https://www.nvidia.com/en-eu/software/nvidia-app" },
+          { name: "SDI", icon: "https://sdi.com.ru/favicon.png", url: "https://sdi.com.ru" },
+          { name: "DriverStoreExplorer", icon: "https://github.com/lostindark/DriverStoreExplorer/raw/master/Rapr/icon.ico", url: "https://github.com/lostindark/DriverStoreExplorer" },
+          { name: "DDU", icon: "https://www.wagnardsoft.com/sites/default/files/styles/large/public/field/image/ddu_logo3_17og_46.jpg?itok=57tKrzAJ", url: "https://www.wagnardsoft.com" },
+          { name: "NVCleanstall", icon: "https://tpucdn.com/download/images/133_icon-v1745405913.png", url: "https://www.techpowerup.com/download/techpowerup-nvcleanstall" },
+          { name: "C++ Пакеты", icon: "https://www.microsoft.com/favicon.ico", url: "https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170" },
+          { name: "DirectX SDK 2010", icon: "https://www.microsoft.com/favicon.ico", url: "https://www.microsoft.com/ru-ru/download/details.aspx?id=8109" }
         ]
       },
       {
         categoryName: "Игры",
         defaultOpen: true,
         apps: [
-          {
-            name: "Steam",
-            icon: "https://store.steampowered.com/favicon.ico",
-            url: "https://store.steampowered.com/about"
-          },
-          {
-            name: "Epic Games",
-            icon: "https://upload.wikimedia.org/wikipedia/commons/3/31/Epic_Games_logo.svg",
-            url: "https://store.epicgames.com/download?lang=ru"
-          },
-          {
-            name: "Ubisoft Connect",
-            icon: "https://img.icons8.com/fluent-systems-regular/1200/ubisoft-connect.jpg",
-            url: "https://www.ubisoft.com/en-us/ubisoft-connect/download"
-          },
-          {
-            name: "EA App",
-            icon: "https://media.contentapi.ea.com/content/dam/eacom/common/medallion-violet.png",
-            url: "https://www.ea.com/ru-ru/ea-app"
-          },
-          {
-            name: "Legacy Launcher",
-            icon: "https://legacylauncher.ru/favicon.ico",
-            url: "https://legacylauncher.ru/ru"
-          },
+          { name: "Steam", icon: "https://store.steampowered.com/favicon.ico", url: "https://store.steampowered.com/about" },
+          { name: "Epic Games", icon: "https://upload.wikimedia.org/wikipedia/commons/3/31/Epic_Games_logo.svg", url: "https://store.epicgames.com/download?lang=ru" },
+          { name: "Ubisoft Connect", icon: "https://img.icons8.com/fluent-systems-regular/1200/ubisoft-connect.jpg", url: "https://www.ubisoft.com/en-us/ubisoft-connect/download" },
+          { name: "EA App", icon: "https://media.contentapi.ea.com/content/dam/eacom/common/medallion-violet.png", url: "https://www.ea.com/ru-ru/ea-app" },
+          { name: "Legacy Launcher", icon: "https://legacylauncher.ru/favicon.ico", url: "https://legacylauncher.ru/ru" }
         ]
       },
       {
         categoryName: "Инет",
         defaultOpen: true,
         apps: [
-          {
-            name: "zapret (Cr1mz)",
-            icon: "https://avatars.githubusercontent.com/u/87567822?v=4",
-            url: "https://t.me/cr1mztg/17"
-          },
-          {
-            name: "zapret (Flowseal)",
-            icon: "https://avatars.githubusercontent.com/u/50780822?s=60&v=4",
-            url: "https://github.com/Flowseal/zapret-discord-youtube"
-          },
-          {
-            name: "tg-ws-proxy",
-            icon: "https://telegram.org/favicon.ico",
-            url: "https://github.com/Flowseal/tg-ws-proxy"
-          },
-          {
-            name: "v2rayN",
-            icon: "https://avatars.githubusercontent.com/u/31833384?s=60&v=4",
-            url: "https://github.com/2dust/v2rayN"
-          },
-          {
-            name: "WARP",
-            icon: "https://one.one.one.one/favicon.ico",
-            url: "https://one.one.one.one"
-          },
-          {
-            name: "AdGuardHome",
-            icon: "https://avatars.githubusercontent.com/u/8361145?s=60&v=4",
-            url: "https://github.com/AdguardTeam/AdGuardHome"
-          },
+          { name: "zapret (Cr1mz)", icon: "https://avatars.githubusercontent.com/u/87567822?v=4", url: "https://t.me/cr1mztg/17" },
+          { name: "zapret (Flowseal)", icon: "https://avatars.githubusercontent.com/u/50780822?s=60&v=4", url: "https://github.com/Flowseal/zapret-discord-youtube" },
+          { name: "tg-ws-proxy", icon: "https://telegram.org/favicon.ico", url: "https://github.com/Flowseal/tg-ws-proxy" },
+          { name: "v2rayN", icon: "https://avatars.githubusercontent.com/u/31833384?s=60&v=4", url: "https://github.com/2dust/v2rayN" },
+          { name: "WARP", icon: "https://one.one.one.one/favicon.ico", url: "https://one.one.one.one" },
+          { name: "AdGuardHome", icon: "https://avatars.githubusercontent.com/u/8361145?s=60&v=4", url: "https://github.com/AdguardTeam/AdGuardHome" }
         ]
       },
       {
         categoryName: "Разработка",
         defaultOpen: false,
         apps: [
-          {
-            name: "Visual Studio Code",
-            icon: "https://code.visualstudio.com/favicon.ico",
-            url: "https://code.visualstudio.com/Download"
-          },
-          {
-            name: "Git",
-            icon: "https://git-scm.com/images/logos/downloads/Git-Icon-1788C.png",
-            url: "https://git-scm.com/downloads"
-          },
-          {
-            name: "Python",
-            icon: "https://www.python.org/favicon.ico",
-            url: "https://www.python.org"
-          },
-          {
-            name: "Termius",
-            icon: "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 xmlns:xlink=%22http://www.w3.org/1999/xlink%22 viewBox=%220 0 80 80%22 overflow=%22visible%22><g><path d=%22M 3.902 80 C 1.747 80 0 78.253 0 76.098 L 0 3.902 C 0 1.747 1.747 0 3.902 0 L 76.098 0 C 78.253 0 80 1.747 80 3.902 L 80 76.098 C 80 78.253 78.253 80 76.098 80 Z%22 fill=%22transparent%22></path><g><defs><linearGradient id=%22idsZwb9HbEmg_3g-1850860349%22 x1=%220.49751243781094523%22 x2=%220.5024875621890548%22 y1=%220%22 y2=%221%22><stop offset=%220%22 stop-color=%22rgb(28,38,83)%22 stop-opacity=%221%22></stop><stop offset=%221%22 stop-color=%22rgb(6,8,22)%22 stop-opacity=%221%22></stop></linearGradient></defs><path d=%22M 0 18.281 C 0 8.185 8.185 0 18.281 0 L 61.719 0 C 71.815 0 80 8.185 80 18.281 L 80 61.719 C 80 71.815 71.815 80 61.719 80 L 18.281 80 C 8.185 80 0 71.815 0 61.719 Z%22 fill=%22url(%23idsZwb9HbEmg_3g-1850860349)%22></path></g><g><defs><linearGradient id=%22idsZwb9HbEmg_4g1331709402%22 x1=%220.49752930263792344%22 x2=%220.5024706973620765%22 y1=%220%22 y2=%221%22><stop offset=%220%22 stop-color=%22rgb(248,251,255)%22 stop-opacity=%221%22></stop><stop offset=%221%22 stop-color=%22rgba(191,192,192,0.9)%22 stop-opacity=%220.9%22></stop></linearGradient></defs><path d=%22M 52.667 56.151 C 52.486 56.151 52.304 56.147 52.122 56.14 C 49.551 60.042 45.194 62.416 40.469 62.416 L 40.469 58.857 C 44.287 58.857 47.777 56.781 49.604 53.425 L 50.186 52.356 L 51.393 52.51 C 51.816 52.565 52.241 52.592 52.667 52.592 C 58.139 52.592 62.594 48.137 62.594 42.665 C 62.594 39.73 61.233 36.856 58.957 34.986 L 58.255 34.409 L 58.31 33.502 C 58.322 33.314 58.328 33.123 58.328 32.933 C 58.328 27.682 54.052 23.406 48.801 23.406 C 46.909 23.406 45.087 23.959 43.515 25.008 L 42.19 25.892 L 41.165 24.673 C 39.345 22.508 36.697 21.274 33.87 21.274 C 28.619 21.274 24.344 25.549 24.344 30.8 C 24.344 30.947 24.347 31.095 24.354 31.242 L 24.411 32.451 L 23.307 32.948 C 19.721 34.563 17.411 38.133 17.411 42.065 C 17.411 47.574 21.896 52.059 27.405 52.059 C 27.99 52.059 28.578 52.008 29.15 51.907 L 30.487 51.672 L 31.067 52.898 C 32.783 56.522 41.466 58.857 40.469 58.857 L 40.469 62.416 C 35.528 62.416 30.963 59.777 28.466 55.576 C 28.113 55.604 27.759 55.618 27.405 55.618 C 19.93 55.618 13.853 49.54 13.853 42.065 C 13.853 37.126 16.538 32.611 20.797 30.231 C 21.096 23.277 26.844 17.715 33.87 17.715 C 37.238 17.715 40.431 18.997 42.848 21.279 C 44.685 20.339 46.715 19.848 48.801 19.848 C 55.982 19.848 61.828 25.658 61.886 32.826 C 64.577 35.36 66.153 38.962 66.153 42.665 C 66.153 50.103 60.105 56.151 52.667 56.151 Z M 47.229 44.62 C 46.02 45.083 44.83 45.317 43.686 45.317 C 42.537 45.317 41.404 45.081 40.322 44.618 C 40.278 44.6 40.278 44.6 40.234 44.581 C 39.835 44.41 39.664 44.203 39.664 43.749 L 39.664 43.144 C 39.664 42.611 39.971 42.268 40.472 42.268 L 40.584 42.283 L 40.614 42.295 C 41.604 42.685 42.637 42.883 43.684 42.883 C 44.735 42.883 45.836 42.684 46.956 42.29 L 47.056 42.268 L 47.084 42.268 C 47.585 42.268 47.892 42.611 47.892 43.144 L 47.892 43.749 C 47.892 44.232 47.726 44.406 47.264 44.605 Z M 32.391 38.812 L 35.662 37.953 L 32.383 37.092 C 32.043 37.004 31.798 36.735 31.798 36.266 L 31.798 35.234 C 31.798 34.784 32.069 34.59 32.378 34.59 C 32.478 34.59 32.582 34.611 32.686 34.65 L 38.524 36.539 C 38.967 36.687 39.211 37.043 39.211 37.531 L 39.211 38.375 C 39.211 38.863 38.968 39.219 38.524 39.367 L 32.673 41.26 C 32.574 41.289 32.486 41.303 32.4 41.303 C 32.034 41.303 31.798 41.04 31.798 40.656 L 31.798 39.641 C 31.798 39.152 32.051 38.883 32.391 38.812 Z%22 fill=%22url(%23idsZwb9HbEmg_4g1331709402)%22></path></g></g></svg>",
-            url: "https://termius.com"
-          },
-          {
-            name: "Tabby",
-            icon: "https://tabby.sh/32bf32ff6c87e8d18932.svg",
-            url: "https://github.com/Eugeny/tabby"
-          },
-          {
-            name: "Android Studio",
-            icon: "https://developer.android.com/favicon.ico",
-            url: "https://developer.android.com/studio?hl=ru"
-          },
-          {
-            name: "platform-tools",
-            icon: "https://developer.android.com/favicon.ico",
-            url: "https://developer.android.com/tools/releases/platform-tools?hl=ru"
-          },
+          { name: "Visual Studio Code", icon: "https://code.visualstudio.com/favicon.ico", url: "https://code.visualstudio.com/Download" },
+          { name: "Git", icon: "https://git-scm.com/images/logos/downloads/Git-Icon-1788C.png", url: "https://git-scm.com/downloads" },
+          { name: "Python", icon: "https://www.python.org/favicon.ico", url: "https://www.python.org" },
+          { name: "Termius", icon: "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 80 80%22><path d=%22M0 18.281C0 8.185 8.185 0 18.281 0h43.438C71.815 0 80 8.185 80 18.281v43.438C80 71.815 71.815 80 61.719 80H18.281C8.185 80 0 71.815 0 61.719Z%22 fill=%22%231c2653%22/><path d=%22M32.391 38.812 35.662 37.953 32.383 37.092c-.34-.088-.585-.357-.585-.826v-1.032c0-.45.271-.644.58-.644.1 0 .204.021.308.06l5.838 1.889c.443.148.687.504.687.992v.844c0 .488-.243.844-.687.992l-5.851 1.893c-.099.029-.187.043-.273.043-.366 0-.602-.263-.602-.647v-1.015c0-.489.253-.758.593-.829z%22 fill=%22%23fff%22/></svg>", url: "https://termius.com" },
+          { name: "Tabby", icon: "https://tabby.sh/32bf32ff6c87e8d18932.svg", url: "https://github.com/Eugeny/tabby" },
+          { name: "Android Studio", icon: "https://developer.android.com/favicon.ico", url: "https://developer.android.com/studio?hl=ru" },
+          { name: "platform-tools", icon: "https://developer.android.com/favicon.ico", url: "https://developer.android.com/tools/releases/platform-tools?hl=ru" }
         ]
-      },
+      }
     ];
 
-    function renderCatalog() {
-      const catalogContainer = document.getElementById("catalog");
-
-      catalogData.forEach((cat) => {
-        const catDiv = document.createElement("div");
-        catDiv.className = `category ${cat.defaultOpen ? "" : "collapsed"}`;
-
-        const header = document.createElement("div");
-        header.className = "category-header";
-        header.innerHTML = `
-          <span class="category-title">${cat.categoryName}</span>
-          <svg class="chevron" viewBox="0 0 24 24">
-            <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/>
-          </svg>
-        `;
-
-        header.addEventListener("click", () => {
-          catDiv.classList.toggle("collapsed");
-        });
-
-        const content = document.createElement("div");
-        content.className = "category-content";
-
-        cat.apps.forEach((app) => {
-          const card = document.createElement("a");
-          card.className = "app-card";
-          card.href = app.url;
-          card.target = "_blank";
-          card.rel = "noopener noreferrer";
-
-          card.innerHTML = `
-            <img class="app-icon" src="${app.icon}" alt="${app.name}" onerror="this.src='https://placehold.co/42x42/transparent/38bdf8?text=App'">
-            <span class="app-name">${app.name}</span>
-          `;
-
-          content.appendChild(card);
-        });
-
-        catDiv.appendChild(header);
-        catDiv.appendChild(content);
-        catalogContainer.appendChild(catDiv);
-      });
+    // Helper: Create SVG Initial Avatar for missing image URLs
+    function getFallbackIcon(name) {
+      const initial = (name || 'A').charAt(0).toUpperCase();
+      const colors = ['#38bdf8', '#818cf8', '#34d399', '#f472b6', '#fbbf24', '#a78bfa'];
+      // Deterministic color selection based on name length
+      const color = colors[name.length % colors.length];
+      
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" class="w-full h-full rounded-lg">
+        <rect width="40" height="40" fill="${color}" fill-opacity="0.15" rx="8"/>
+        <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="${color}" font-weight="700" font-size="18">${initial}</text>
+      </svg>`;
+      return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
     }
 
-    document.addEventListener("DOMContentLoaded", renderCatalog);
-  </script>
+    // Recalculates height of open category wrapper dynamically for smooth CSS transitions
+    function setWrapperHeight(wrapper, isExpanding) {
+      if (isExpanding) {
+        wrapper.classList.remove('collapsed');
+        const innerGrid = wrapper.querySelector('.app-grid');
+        // Calculate exact content height including padding
+        const targetHeight = innerGrid.offsetHeight + 24; // 24px padding top/bottom
+        wrapper.style.height = `${targetHeight}px`;
+        wrapper.style.opacity = '1';
+        
+        // Remove fixed pixel height after animation completes so window resizing works seamlessly
+        setTimeout(() => {
+          if (!wrapper.classList.contains('collapsed')) {
+            wrapper.style.height = 'auto';
+          }
+        }, 360);
+      } else {
+        // Explicitly set pixel height before collapsing to trigger CSS transition
+        wrapper.style.height = `${wrapper.offsetHeight}px`;
+        // Force browser repaint
+        wrapper.offsetHeight; 
+        wrapper.classList.add('collapsed');
+        wrapper.style.height = '0px';
+        wrapper.style.opacity = '0';
+      }
+    }
 
+    function renderCatalog(filterText = '') {
+      const container = document.getElementById('catalog');
+      const noResults = document.getElementById('noResults');
+      container.innerHTML = '';
+
+      let totalVisibleApps = 0;
+      const query = filterText.toLowerCase().trim();
+
+      catalogData.forEach((cat, index) => {
+        // Filter apps by query
+        const filteredApps = cat.apps.filter(app => 
+          app.name.toLowerCase().includes(query)
+        );
+
+        if (query && filteredApps.length === 0) {
+          return; // Skip category if query active and no apps match
+        }
+
+        totalVisibleApps += filteredApps.length;
+
+        // Create Category Box
+        const catBox = document.createElement('div');
+        catBox.className = 'rounded-2xl border border-dark-border bg-dark-card/60 overflow-hidden shadow-lg transition-all duration-200';
+
+        // Header
+        const catHeader = document.createElement('div');
+        catHeader.className = 'px-5 py-4 flex items-center justify-between cursor-pointer select-none bg-dark-card hover:bg-dark-hover/80 transition-colors duration-150';
+
+        // Auto-open if search is active, otherwise rely on defaultOpen
+        const shouldBeOpen = query ? true : cat.defaultOpen;
+
+        catHeader.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="font-bold text-base sm:text-lg text-slate-100 tracking-wide">${cat.categoryName}</span>
+            <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-slate-800 text-brand-400 border border-slate-700/60">
+              ${filteredApps.length}
+            </span>
+          </div>
+          <div class="chevron-icon text-slate-400 p-1 rounded-lg hover:text-white">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </div>
+        `;
+
+        // Content Wrapper
+        const wrapper = document.createElement('div');
+        wrapper.className = `category-content-wrapper ${shouldBeOpen ? '' : 'collapsed'}`;
+        
+        const innerContent = document.createElement('div');
+        innerContent.className = 'p-3 sm:p-4';
+
+        const grid = document.createElement('div');
+        grid.className = 'app-grid';
+
+        // Populate Cards
+        filteredApps.forEach(app => {
+          const card = document.createElement('a');
+          card.href = app.url;
+          card.target = '_blank';
+          card.rel = 'noopener noreferrer';
+          card.className = 'glass-card group flex items-center gap-3.5 p-3 rounded-xl transition-all duration-200 hover:-translate-y-0.5 shadow-sm hover:shadow-md hover:shadow-brand-500/5';
+
+          // Icon container with fallbacks
+          const iconWrapper = document.createElement('div');
+          iconWrapper.className = 'w-10 h-10 sm:w-11 sm:h-11 rounded-lg bg-slate-800/80 p-1.5 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform duration-200 border border-slate-700/40 overflow-hidden';
+
+          const img = document.createElement('img');
+          img.src = app.icon;
+          img.alt = app.name;
+          img.className = 'w-full h-full object-contain';
+          img.loading = 'lazy';
+          
+          // Image Fallback error handler
+          img.onerror = function() {
+            this.onerror = null; // Prevent infinite loop
+            this.src = getFallbackIcon(app.name);
+          };
+
+          iconWrapper.appendChild(img);
+
+          // Name Title
+          const nameSpan = document.createElement('span');
+          nameSpan.className = 'text-xs sm:text-sm font-semibold text-slate-200 group-hover:text-brand-400 transition-colors line-clamp-2 leading-snug';
+          nameSpan.textContent = app.name;
+
+          card.appendChild(iconWrapper);
+          card.appendChild(nameSpan);
+          grid.appendChild(card);
+        });
+
+        innerContent.appendChild(grid);
+        wrapper.appendChild(innerContent);
+
+        // Header click listener for smooth accordion animation
+        catHeader.addEventListener('click', () => {
+          const isCollapsed = wrapper.classList.contains('collapsed');
+          catHeader.querySelector('.chevron-icon').parentElement.classList.toggle('collapsed', !isCollapsed);
+          setWrapperHeight(wrapper, isCollapsed);
+        });
+
+        // Sync initial chevron rotation state
+        if (!shouldBeOpen) {
+          catHeader.querySelector('.chevron-icon').parentElement.classList.add('collapsed');
+        }
+
+        catBox.appendChild(catHeader);
+        catBox.appendChild(wrapper);
+        container.appendChild(catBox);
+
+        // Calculate initial open height
+        if (shouldBeOpen) {
+          requestAnimationFrame(() => {
+            wrapper.style.height = 'auto';
+            wrapper.style.opacity = '1';
+          });
+        }
+      });
+
+      // Show/Hide Empty State
+      if (totalVisibleApps === 0) {
+        noResults.classList.remove('hidden');
+      } else {
+        noResults.classList.add('hidden');
+      }
+    }
+
+    // Search Listener
+    const searchInput = document.getElementById('searchInput');
+    const clearSearch = document.getElementById('clearSearch');
+
+    searchInput.addEventListener('input', (e) => {
+      const value = e.target.value;
+      if (value.length > 0) {
+        clearSearch.classList.remove('hidden');
+      } else {
+        clearSearch.classList.add('hidden');
+      }
+      renderCatalog(value);
+    });
+
+    clearSearch.addEventListener('click', () => {
+      searchInput.value = '';
+      clearSearch.classList.add('hidden');
+      renderCatalog('');
+    });
+
+    // Expand All / Collapse All Buttons
+    document.getElementById('expandAllBtn').addEventListener('click', () => {
+      document.querySelectorAll('.category-content-wrapper').forEach(wrapper => {
+        const header = wrapper.previousElementSibling;
+        header.querySelector('.chevron-icon').parentElement.classList.remove('collapsed');
+        setWrapperHeight(wrapper, true);
+      });
+    });
+
+    document.getElementById('collapseAllBtn').addEventListener('click', () => {
+      document.querySelectorAll('.category-content-wrapper').forEach(wrapper => {
+        const header = wrapper.previousElementSibling;
+        header.querySelector('.chevron-icon').parentElement.classList.add('collapsed');
+        setWrapperHeight(wrapper, false);
+      });
+    });
+
+    // Recalculate expanded wrapper heights on window resize to prevent visual overflows
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        document.querySelectorAll('.category-content-wrapper:not(.collapsed)').forEach(wrapper => {
+          wrapper.style.height = 'auto';
+        });
+      }, 100);
+    });
+
+    // Initial render
+    document.addEventListener('DOMContentLoaded', () => {
+      renderCatalog();
+    });
+  </script>
 </body>
 </html>

@@ -48,7 +48,6 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* Category Collapsible Smooth JS Container */
     .category-content-wrapper {
       transition: height 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
       overflow: hidden;
@@ -61,7 +60,6 @@
       pointer-events: none;
     }
 
-    /* Chevron rotation */
     .chevron-icon {
       transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -69,7 +67,6 @@
       transform: rotate(-90deg);
     }
 
-    /* Custom card grid responsive adjustments */
     .app-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
@@ -82,7 +79,6 @@
       }
     }
 
-    /* Glassmorphism subtle effects */
     .glass-card {
       background: rgba(22, 30, 46, 0.75);
       backdrop-filter: blur(8px);
@@ -94,7 +90,6 @@
       border-color: rgba(56, 189, 248, 0.4);
     }
 
-    /* Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 8px;
     }
@@ -114,7 +109,6 @@
 
   <div class="w-full max-w-4xl space-y-6">
     
-    <!-- Header -->
     <header class="text-center space-y-2 py-4">
       <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white flex items-center justify-center gap-2">
         <span class="bg-gradient-to-r from-brand-400 to-sky-200 bg-clip-text text-transparent">ПК Софт</span>
@@ -124,9 +118,7 @@
       </p>
     </header>
 
-    <!-- Toolbar: Search & Action Buttons -->
     <div class="flex flex-col sm:flex-row gap-3 items-center justify-between">
-      <!-- Search Input -->
       <div class="relative w-full sm:w-80">
         <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,7 +138,6 @@
         </button>
       </div>
 
-      <!-- Action Buttons -->
       <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
         <button 
           id="expandAllBtn" 
@@ -165,10 +156,8 @@
       </div>
     </div>
 
-    <!-- Catalog Container -->
     <div id="catalog" class="space-y-4"></div>
 
-    <!-- Empty Search Results State -->
     <div id="noResults" class="hidden text-center py-12 space-y-3">
       <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-800 text-slate-400">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 9.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -306,11 +295,9 @@
       }
     ];
 
-    // Helper: Create SVG Initial Avatar for missing image URLs
     function getFallbackIcon(name) {
       const initial = (name || 'A').charAt(0).toUpperCase();
       const colors = ['#38bdf8', '#818cf8', '#34d399', '#f472b6', '#fbbf24', '#a78bfa'];
-      // Deterministic color selection based on name length
       const color = colors[name.length % colors.length];
       
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" class="w-full h-full rounded-lg">
@@ -320,26 +307,21 @@
       return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
     }
 
-    // Recalculates height of open category wrapper dynamically for smooth CSS transitions
     function setWrapperHeight(wrapper, isExpanding) {
       if (isExpanding) {
         wrapper.classList.remove('collapsed');
         const innerGrid = wrapper.querySelector('.app-grid');
-        // Calculate exact content height including padding
-        const targetHeight = innerGrid.offsetHeight + 24; // 24px padding top/bottom
+        const targetHeight = innerGrid.offsetHeight + 24;
         wrapper.style.height = `${targetHeight}px`;
         wrapper.style.opacity = '1';
         
-        // Remove fixed pixel height after animation completes so window resizing works seamlessly
         setTimeout(() => {
           if (!wrapper.classList.contains('collapsed')) {
             wrapper.style.height = 'auto';
           }
         }, 360);
       } else {
-        // Explicitly set pixel height before collapsing to trigger CSS transition
         wrapper.style.height = `${wrapper.offsetHeight}px`;
-        // Force browser repaint
         wrapper.offsetHeight; 
         wrapper.classList.add('collapsed');
         wrapper.style.height = '0px';
@@ -356,26 +338,22 @@
       const query = filterText.toLowerCase().trim();
 
       catalogData.forEach((cat, index) => {
-        // Filter apps by query
         const filteredApps = cat.apps.filter(app => 
           app.name.toLowerCase().includes(query)
         );
 
         if (query && filteredApps.length === 0) {
-          return; // Skip category if query active and no apps match
+          return;
         }
 
         totalVisibleApps += filteredApps.length;
 
-        // Create Category Box
         const catBox = document.createElement('div');
         catBox.className = 'rounded-2xl border border-dark-border bg-dark-card/60 overflow-hidden shadow-lg transition-all duration-200';
 
-        // Header
         const catHeader = document.createElement('div');
         catHeader.className = 'px-5 py-4 flex items-center justify-between cursor-pointer select-none bg-dark-card hover:bg-dark-hover/80 transition-colors duration-150';
 
-        // Auto-open if search is active, otherwise rely on defaultOpen
         const shouldBeOpen = query ? true : cat.defaultOpen;
 
         catHeader.innerHTML = `
@@ -392,7 +370,6 @@
           </div>
         `;
 
-        // Content Wrapper
         const wrapper = document.createElement('div');
         wrapper.className = `category-content-wrapper ${shouldBeOpen ? '' : 'collapsed'}`;
         
@@ -402,7 +379,6 @@
         const grid = document.createElement('div');
         grid.className = 'app-grid';
 
-        // Populate Cards
         filteredApps.forEach(app => {
           const card = document.createElement('a');
           card.href = app.url;
@@ -410,9 +386,8 @@
           card.rel = 'noopener noreferrer';
           card.className = 'glass-card group flex items-center gap-3.5 p-3 rounded-xl transition-all duration-200 hover:-translate-y-0.5 shadow-sm hover:shadow-md hover:shadow-brand-500/5';
 
-          // Icon container with fallbacks
           const iconWrapper = document.createElement('div');
-          iconWrapper.className = 'w-10 h-10 sm:w-11 sm:h-11 rounded-lg bg-slate-800/80 p-1.5 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform duration-200 border border-slate-700/40 overflow-hidden';
+          iconWrapper.className = 'w-10 h-10 sm:w-11 sm:h-11 rounded-lg bg-slate-800/80 p-1.5 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform duration-200 overflow-hidden';
 
           const img = document.createElement('img');
           img.src = app.icon;
@@ -420,15 +395,13 @@
           img.className = 'w-full h-full object-contain';
           img.loading = 'lazy';
           
-          // Image Fallback error handler
           img.onerror = function() {
-            this.onerror = null; // Prevent infinite loop
+            this.onerror = null;
             this.src = getFallbackIcon(app.name);
           };
 
           iconWrapper.appendChild(img);
 
-          // Name Title
           const nameSpan = document.createElement('span');
           nameSpan.className = 'text-xs sm:text-sm font-semibold text-slate-200 group-hover:text-brand-400 transition-colors line-clamp-2 leading-snug';
           nameSpan.textContent = app.name;
@@ -441,14 +414,12 @@
         innerContent.appendChild(grid);
         wrapper.appendChild(innerContent);
 
-        // Header click listener for smooth accordion animation
         catHeader.addEventListener('click', () => {
           const isCollapsed = wrapper.classList.contains('collapsed');
           catHeader.querySelector('.chevron-icon').parentElement.classList.toggle('collapsed', !isCollapsed);
           setWrapperHeight(wrapper, isCollapsed);
         });
 
-        // Sync initial chevron rotation state
         if (!shouldBeOpen) {
           catHeader.querySelector('.chevron-icon').parentElement.classList.add('collapsed');
         }
@@ -457,7 +428,6 @@
         catBox.appendChild(wrapper);
         container.appendChild(catBox);
 
-        // Calculate initial open height
         if (shouldBeOpen) {
           requestAnimationFrame(() => {
             wrapper.style.height = 'auto';
@@ -466,7 +436,6 @@
         }
       });
 
-      // Show/Hide Empty State
       if (totalVisibleApps === 0) {
         noResults.classList.remove('hidden');
       } else {
@@ -474,7 +443,6 @@
       }
     }
 
-    // Search Listener
     const searchInput = document.getElementById('searchInput');
     const clearSearch = document.getElementById('clearSearch');
 
@@ -494,7 +462,6 @@
       renderCatalog('');
     });
 
-    // Expand All / Collapse All Buttons
     document.getElementById('expandAllBtn').addEventListener('click', () => {
       document.querySelectorAll('.category-content-wrapper').forEach(wrapper => {
         const header = wrapper.previousElementSibling;
@@ -511,7 +478,6 @@
       });
     });
 
-    // Recalculate expanded wrapper heights on window resize to prevent visual overflows
     let resizeTimer;
     window.addEventListener('resize', () => {
       clearTimeout(resizeTimer);
@@ -522,7 +488,6 @@
       }, 100);
     });
 
-    // Initial render
     document.addEventListener('DOMContentLoaded', () => {
       renderCatalog();
     });

@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="https://avatars.githubusercontent.com/u/87567822?v=4">
+  <title>Софт</title>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --card-hover: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --border-color: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 800px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      color: var(--accent);
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    /* Категории */
+    .category {
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      background-color: rgba(30, 41, 59, 0.5);
+    }
+
+    .category-header {
+      padding: 18px 24px;
+      background-color: var(--card-bg);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+      transition: background-color 0.2s;
+    }
+
+    .category-header:hover {
+      background-color: var(--card-hover);
+    }
+
+    .category-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .chevron {
+      width: 20px;
+      height: 20px;
+      fill: var(--text-muted);
+      transition: transform 0.3s ease;
+    }
+
+    .category.collapsed .chevron {
+      transform: rotate(-90deg);
+    }
+
+    .category-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+      padding: 20px;
+      transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+      max-height: 2000px; /* Запас высоты для анимации */
+      opacity: 1;
+    }
+
+    .category.collapsed .category-content {
+      max-height: 0;
+      opacity: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      overflow: hidden;
+    }
+
+    /* Прямоугольные карточки программ */
+    .app-card {
+      display: flex;
+      align-items: center;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 14px 18px;
+      text-decoration: none;
+      color: var(--text-main);
+      transition: all 0.2s ease;
+    }
+
+    .app-card:hover {
+      background-color: var(--card-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      border-color: var(--accent);
+    }
+
+    .app-icon {
+      width: 42px;
+      height: 42px;
+      object-fit: contain;
+      margin-right: 16px;
+      flex-shrink: 0;
+      background-color: transparent; /* Сделали фон полностью прозрачным */
+    }
+
+    .app-name {
+      font-size: 1rem;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Софт</h1>
+      <p>Быстрый доступ к скачиванию нужных программ</p>
+    </header>
+
+    <div id="catalog"></div>
+  </div>
+
+  <script>
+    // =========================================================================
+    //  БЛОК ДАННЫХ (РЕДАКТИРУЙТЕ ЕГО ДЛЯ ДОБАВЛЕНИЯ КАТЕГОРИЙ И ПРОГРАММ)
+    // =========================================================================
+    const catalogData = [
+      {
+        categoryName: "Браузеры",
+        defaultOpen: true, // true - открыта по умолчанию, false - свернута
+        apps: [
+          {
+            name: "Helium",
+            icon: "https://helium.computer/icon/helium-app-icon.svg",
+            url: "https://helium.computer"
+          },
+          {
+            name: "Mozilla Firefox",
+            icon: "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a0/Firefox_logo%2C_2019.svg/1280px-Firefox_logo%2C_2019.svg.png",
+            url: "https://www.firefox.com/ru/download/all/desktop-release/win64/ru"
+          },
+          {
+            name: "Google Chrome",
+            icon: "https://www.google.com/chrome/static/images/chrome-logo-m100.svg",
+            url: "https://www.google.com/chrome"
+          },
+        ]
+      },
+      {
+        categoryName: "Утилиты",
+        defaultOpen: true,
+        apps: [
+          {
+            name: "7-Zip",
+            icon: "https://www.7-zip.org/7ziplogo.png",
+            url: "https://www.7-zip.org"
+          },
+          {
+            name: "WinRAR",
+            icon: "https://www.win-rar.com/partners/affiliates/images/screenshots/winrarbanner03.png",
+            url: "https://www.rarlab.com/download.htm"
+          },
+          {
+            name: "ShareX",
+            icon: "https://getsharex.com/img/ShareX_Logo_120.png",
+            url: "https://getsharex.com"
+          },
+          {
+            name: "qBittorrent",
+            icon: "https://www.qbittorrent.org/favicon.ico",
+            url: "https://www.qbittorrent.org/download"
+          },
+          {
+            name: "LocalSend",
+            icon: "https://localsend.org/img/logo.png",
+            url: "https://localsend.org/ru"
+          },
+          {
+            name: "KeePassXC",
+            icon: "https://avatars.githubusercontent.com/u/22534815?s=60&v=4",
+            url: "https://github.com/keepassxreboot/keepassxc"
+          },
+          {
+            name: "NPP",
+            icon: "https://avatars.githubusercontent.com/u/12589084?s=60&v=4",
+            url: "https://github.com/notepad-plus-plus/notepad-plus-plus"
+          },
+          {
+            name: "Everything",
+            icon: "https://www.voidtools.com/favicon.ico",
+            url: "https://www.voidtools.com/ru-ru"
+          },
+          {
+            name: "CrystalDiskMark",
+            icon: "https://crystalmark.info/favicon.ico",
+            url: "https://crystalmark.info/en/download/#CrystalDiskMark"
+          },
+          {
+            name: "CrystalDiskInfo",
+            icon: "https://crystalmark.info/favicon.ico",
+            url: "https://crystalmark.info/en/download/#CrystalDiskInfo"
+          },
+          {
+            name: "Ventoy",
+            icon: "https://avatars.githubusercontent.com/u/59477474?s=60&v=4",
+            url: "https://github.com/ventoy/Ventoy"
+          },
+          {
+            name: "Rufus",
+            icon: "https://rufus.ie/favicon.ico",
+            url: "https://rufus.ie/ru"
+          },
+          {
+          name: "FileConverter",
+          icon: "https://github.com/Tichau/FileConverter/raw/refs/heads/integration/Resources/Icons/ApplicationIcon-256x256.ico",
+          url: "https://github.com/Tichau/FileConverter"
+          },
+          {
+            name: "OpenHashTab",
+            icon: "https://img.utdstc.com/icon/8d6/ed8/8d6ed8ec18dc70589fd63b0dafdbf53e4fa8db6aa6ce8dab14716d24a805be06:600",
+            url: "https://t.me/cr1mztg/15"
+          },
+          {
+            name: "ExifTool",
+            icon: "https://exiftool.org/favicon.ico",
+            url: "https://exiftool.org"
+          },
+          {
+          name: "Super Productivity",
+          icon: "https://avatars.githubusercontent.com/u/215719836?s=60&v=4",
+          url: "https://github.com/super-productivity/super-productivity"
+          },
+          {
+            name: "Rainmeter",
+            icon: "https://www.rainmeter.net/favicon.ico",
+            url: "https://www.rainmeter.net"
+          },
+          {
+            name: "WizTree",
+            icon: "https://diskanalyzer.com/favicon.ico",
+            url: "https://diskanalyzer.com/download"
+          },
+          {
+            name: "h2testw",
+            icon: "https://h2testw.org/wp-content/uploads/2023/03/h2testw-logo.png",
+            url: "https://h2testw.org/#download-h2testw"
+          },
+          {
+            name: "Validrive",
+            icon: "https://www.grc.com/validrive/ValiDrive-Icon.png",
+            url: "https://www.grc.com/validrive.htm"
+          },
+          {
+            name: "OCCT",
+            icon: "https://www.ocbase.com/favicon.ico",
+            url: "https://www.ocbase.com"
+          },
+          {
+            name: "HWInfo",
+            icon: "https://www.hwinfo.com/favicon.ico",
+            url: "https://www.hwinfo.com/download"
+          },
+          {
+          name: "AutoHotkey",
+          icon: "https://www.autohotkey.com/favicon.ico",
+          url: "https://www.autohotkey.com"
+          },
+          {
+            name: "RustDesk",
+            icon: "https://avatars.githubusercontent.com/u/71636191?s=60&v=4",
+            url: "https://github.com/rustdesk/rustdesk"
+          },
+        ]
+      },
+      {
+        categoryName: "Мультимедиа",
+        defaultOpen: true,
+        apps: [
+        {
+          name: "K-Lite Codec Pack",
+          icon: "https://www.codecguide.com/mpc_logo.png",
+          url: "https://www.codecguide.com/download_kl.htm"
+        },
+        {
+          name: "AIMP",
+          icon: "https://aimp.ru/v2/pages/download/icon-aimp.png",
+          url: "https://aimp.ru/?do=download&os=windows"
+        },
+        {
+          name: "OBS",
+          icon: "https://obsproject.com/assets/images/new_icon_small-r.png",
+          url: "https://obsproject.com"
+        },
+        {
+          name: "yt-dlp",
+          icon: "https://avatars.githubusercontent.com/u/79589310?s=60&v=4",
+          url: "https://github.com/yt-dlp/yt-dlp"
+        },
+        {
+          name: "dlpx",
+          icon: "https://camo.githubusercontent.com/9fbd07251bff411aa804b830b1ef3943e60737b26883f74ee4ce90ec55e42970/68747470733a2f2f692e696d6775722e636f6d2f484339523578362e706e67",
+          url: "https://github.com/cr1mzx/dlpx"
+        },
+        {
+          name: "FFmpeg",
+          icon: "https://ffmpeg.org/favicon.ico",
+          url: "https://www.gyan.dev/ffmpeg/builds"
+        },
+        {
+          name: "TwitchDownloaderWPF",
+          icon: "https://github.com/lay295/TwitchDownloader/raw/master/TwitchDownloaderWPF/Images/Logo.png",
+          url: "https://github.com/lay295/TwitchDownloader"
+        },
+        {
+          name: "LosslessCut",
+          icon: "https://github.com/mifi/lossless-cut/raw/master/src/renderer/src/icon.svg",
+          url: "https://github.com/mifi/lossless-cut"
+        },
+        {
+          name: "Blender",
+          icon: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0c/Blender_logo_no_text.svg/1280px-Blender_logo_no_text.svg.png",
+          url: "https://www.blender.org/download"
+        },
+        {
+          name: "VLC",
+          icon: "https://www.videolan.org/favicon.ico",
+          url: "https://www.videolan.org/vlc/index.html?pStoreID=fedex%27A=0"
+        },
+        {
+          name: "Audacity",
+          icon: "https://avatars.githubusercontent.com/u/11648186?s=60&v=4",
+          url: "https://github.com/audacity/audacity"
+        },
+        ]
+      },
+      {
+        categoryName: "Общение",
+        defaultOpen: true,
+        apps: [
+        {
+          name: "Telegram",
+          icon: "https://telegram.org/favicon.ico",
+          url: "https://desktop.telegram.org/"
+        },
+        {
+          name: "Discord",
+          icon: "https://discord.com/favicon.ico",
+          url: "https://discord.com/download"
+        },
+        ]
+      },
+      {
+        categoryName: "Драйвера",
+        defaultOpen: true,
+        apps: [
+        {
+          name: "NVIDIA Driver",
+          icon: "https://www.nvidia.com/favicon.ico",
+          url: "https://www.nvidia.com/en-eu/geforce/drivers"
+        },  
+        {
+          name: "NVIDIA App",
+          icon: "https://www.nvidia.com/favicon.ico",
+          url: "https://www.nvidia.com/en-eu/software/nvidia-app"
+        },
+        {
+          name: "SDI",
+          icon: "https://sdi.com.ru/favicon.png",
+          url: "https://sdi.com.ru"
+        },
+        {
+          name: "DriverStoreExplorer",
+          icon: "https://github.com/lostindark/DriverStoreExplorer/raw/master/Rapr/icon.ico",
+          url: "https://github.com/lostindark/DriverStoreExplorer"
+        },
+        {
+          name: "DDU",
+          icon: "https://www.wagnardsoft.com/sites/default/files/styles/large/public/field/image/ddu_logo3_17og_46.jpg?itok=57tKrzAJ",
+          url: "https://www.wagnardsoft.com"
+        },
+        {
+          name: "NVCleanstall",
+          icon: "https://tpucdn.com/download/images/133_icon-v1745405913.png",
+          url: "https://www.techpowerup.com/download/techpowerup-nvcleanstall"
+        },
+        {
+          name: "C++ Пакеты",
+          icon: "https://www.microsoft.com/favicon.ico",
+          url: "https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170"
+        },
+        {
+          name: "DirectX SDK 2010",
+          icon: "https://www.microsoft.com/favicon.ico",
+          url: "https://www.microsoft.com/ru-ru/download/details.aspx?id=8109"
+        },
+        ]
+      },
+      {
+        categoryName: "Игры",
+        defaultOpen: true,
+        apps: [
+        {
+          name: "Steam",
+          icon: "https://store.steampowered.com/favicon.ico",
+          url: "https://store.steampowered.com/about"
+        },
+        {
+          name: "Epic Games",
+          icon: "https://upload.wikimedia.org/wikipedia/commons/3/31/Epic_Games_logo.svg",
+          url: "https://store.epicgames.com/download?lang=ru"
+        },
+        {
+          name: "Ubisoft Connect",
+          icon: "https://img.icons8.com/fluent-systems-regular/1200/ubisoft-connect.jpg",
+          url: "https://www.ubisoft.com/en-us/ubisoft-connect/download"
+        },
+        {
+          name: "EA App",
+          icon: "https://media.contentapi.ea.com/content/dam/eacom/common/medallion-violet.png",
+          url: "https://www.ea.com/ru-ru/ea-app"
+        },
+        ]
+      },
+      {
+        categoryName: "Инет",
+        defaultOpen: true,
+        apps: [
+        {
+          name: "zapret-discord-youtube",
+          icon: "https://avatars.githubusercontent.com/u/50780822?s=60&v=4",
+          url: "https://github.com/Flowseal/zapret-discord-youtube"
+        },
+        {
+          name: "tg-ws-proxy",
+          icon: "https://telegram.org/favicon.ico",
+          url: "https://github.com/Flowseal/tg-ws-proxy"
+        },
+        {
+          name: "v2rayN",
+          icon: "https://avatars.githubusercontent.com/u/31833384?s=60&v=4",
+          url: "https://github.com/2dust/v2rayN"
+        },
+        {
+          name: "WARP",
+          icon: "https://one.one.one.one/favicon.ico",
+          url: "https://one.one.one.one"
+        },
+        {
+          name: "AdGuardHome",
+          icon: "https://avatars.githubusercontent.com/u/8361145?s=60&v=4",
+          url: "https://github.com/AdguardTeam/AdGuardHome"
+        },
+        ]
+      },
+      {
+        categoryName: "Разработка",
+        defaultOpen: false,
+        apps: [
+          {
+            name: "Visual Studio Code",
+            icon: "https://code.visualstudio.com/favicon.ico",
+            url: "https://code.visualstudio.com/Download"
+          },
+          {
+            name: "Git",
+            icon: "https://git-scm.com/images/logos/downloads/Git-Icon-1788C.png",
+            url: "https://git-scm.com/downloads"
+          },
+          {
+            name: "Python",
+            icon: "https://www.python.org/favicon.ico",
+            url: "https://www.python.org"
+          },
+          {
+            name: "Termius",
+            icon: "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 xmlns:xlink=%22http://www.w3.org/1999/xlink%22 viewBox=%220 0 80 80%22 overflow=%22visible%22><g><path d=%22M 3.902 80 C 1.747 80 0 78.253 0 76.098 L 0 3.902 C 0 1.747 1.747 0 3.902 0 L 76.098 0 C 78.253 0 80 1.747 80 3.902 L 80 76.098 C 80 78.253 78.253 80 76.098 80 Z%22 fill=%22transparent%22></path><g><defs><linearGradient id=%22idsZwb9HbEmg_3g-1850860349%22 x1=%220.49751243781094523%22 x2=%220.5024875621890548%22 y1=%220%22 y2=%221%22><stop offset=%220%22 stop-color=%22rgb(28,38,83)%22 stop-opacity=%221%22></stop><stop offset=%221%22 stop-color=%22rgb(6,8,22)%22 stop-opacity=%221%22></stop></linearGradient></defs><path d=%22M 0 18.281 C 0 8.185 8.185 0 18.281 0 L 61.719 0 C 71.815 0 80 8.185 80 18.281 L 80 61.719 C 80 71.815 71.815 80 61.719 80 L 18.281 80 C 8.185 80 0 71.815 0 61.719 Z%22 fill=%22url(%23idsZwb9HbEmg_3g-1850860349)%22></path></g><g><defs><linearGradient id=%22idsZwb9HbEmg_4g1331709402%22 x1=%220.49752930263792344%22 x2=%220.5024706973620765%22 y1=%220%22 y2=%221%22><stop offset=%220%22 stop-color=%22rgb(248,251,255)%22 stop-opacity=%221%22></stop><stop offset=%221%22 stop-color=%22rgba(191,192,192,0.9)%22 stop-opacity=%220.9%22></stop></linearGradient></defs><path d=%22M 52.667 56.151 C 52.486 56.151 52.304 56.147 52.122 56.14 C 49.551 60.042 45.194 62.416 40.469 62.416 L 40.469 58.857 C 44.287 58.857 47.777 56.781 49.604 53.425 L 50.186 52.356 L 51.393 52.51 C 51.816 52.565 52.241 52.592 52.667 52.592 C 58.139 52.592 62.594 48.137 62.594 42.665 C 62.594 39.73 61.233 36.856 58.957 34.986 L 58.255 34.409 L 58.31 33.502 C 58.322 33.314 58.328 33.123 58.328 32.933 C 58.328 27.682 54.052 23.406 48.801 23.406 C 46.909 23.406 45.087 23.959 43.515 25.008 L 42.19 25.892 L 41.165 24.673 C 39.345 22.508 36.697 21.274 33.87 21.274 C 28.619 21.274 24.344 25.549 24.344 30.8 C 24.344 30.947 24.347 31.095 24.354 31.242 L 24.411 32.451 L 23.307 32.948 C 19.721 34.563 17.411 38.133 17.411 42.065 C 17.411 47.574 21.896 52.059 27.405 52.059 C 27.99 52.059 28.578 52.008 29.15 51.907 L 30.487 51.672 L 31.067 52.898 C 32.783 56.522 41.466 58.857 40.469 58.857 L 40.469 62.416 C 35.528 62.416 30.963 59.777 28.466 55.576 C 28.113 55.604 27.759 55.618 27.405 55.618 C 19.93 55.618 13.853 49.54 13.853 42.065 C 13.853 37.126 16.538 32.611 20.797 30.231 C 21.096 23.277 26.844 17.715 33.87 17.715 C 37.238 17.715 40.431 18.997 42.848 21.279 C 44.685 20.339 46.715 19.848 48.801 19.848 C 55.982 19.848 61.828 25.658 61.886 32.826 C 64.577 35.36 66.153 38.962 66.153 42.665 C 66.153 50.103 60.105 56.151 52.667 56.151 Z M 47.229 44.62 C 46.02 45.083 44.83 45.317 43.686 45.317 C 42.537 45.317 41.404 45.081 40.322 44.618 C 40.278 44.6 40.278 44.6 40.234 44.581 C 39.835 44.41 39.664 44.203 39.664 43.749 L 39.664 43.144 C 39.664 42.611 39.971 42.268 40.472 42.268 L 40.584 42.283 L 40.614 42.295 C 41.604 42.685 42.637 42.883 43.684 42.883 C 44.735 42.883 45.836 42.684 46.956 42.29 L 47.056 42.268 L 47.084 42.268 C 47.585 42.268 47.892 42.611 47.892 43.144 L 47.892 43.749 C 47.892 44.232 47.726 44.406 47.264 44.605 Z M 32.391 38.812 L 35.662 37.953 L 32.383 37.092 C 32.043 37.004 31.798 36.735 31.798 36.266 L 31.798 35.234 C 31.798 34.784 32.069 34.59 32.378 34.59 C 32.478 34.59 32.582 34.611 32.686 34.65 L 38.524 36.539 C 38.967 36.687 39.211 37.043 39.211 37.531 L 39.211 38.375 C 39.211 38.863 38.968 39.219 38.524 39.367 L 32.673 41.26 C 32.574 41.289 32.486 41.303 32.4 41.303 C 32.034 41.303 31.798 41.04 31.798 40.656 L 31.798 39.641 C 31.798 39.152 32.051 38.883 32.391 38.812 Z%22 fill=%22url(%23idsZwb9HbEmg_4g1331709402)%22></path></g></g></svg>",
+            url: "https://termius.com"
+          },
+          {
+            name: "Tabby",
+            icon: "https://tabby.sh/32bf32ff6c87e8d18932.svg",
+            url: "https://github.com/Eugeny/tabby"
+          },
+          {
+            name: "Android Studio",
+            icon: "https://developer.android.com/favicon.ico",
+            url: "https://developer.android.com/studio?hl=ru"
+          },
+          {
+            name: "platform-tools",
+            icon: "https://developer.android.com/favicon.ico",
+            url: "https://developer.android.com/tools/releases/platform-tools?hl=ru"
+          },
+        ]
+      },
+    ];
+
+    // =========================================================================
+    //  ЛОГИКА ОТОБРАЖЕНИЯ (ЗДЕСЬ НИЧЕГО ИЗМЕНЯТЬ НЕ НУЖНО)
+    // =========================================================================
+    function renderCatalog() {
+      const catalogContainer = document.getElementById("catalog");
+
+      catalogData.forEach((cat) => {
+        const catDiv = document.createElement("div");
+        catDiv.className = `category ${cat.defaultOpen ? "" : "collapsed"}`;
+
+        // Шапка категории
+        const header = document.createElement("div");
+        header.className = "category-header";
+        header.innerHTML = `
+          <span class="category-title">${cat.categoryName}</span>
+          <svg class="chevron" viewBox="0 0 24 24">
+            <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z"/>
+          </svg>
+        `;
+
+        // Клик для сворачивания/разворачивания
+        header.addEventListener("click", () => {
+          catDiv.classList.toggle("collapsed");
+        });
+
+        // Контейнер карточек
+        const content = document.createElement("div");
+        content.className = "category-content";
+
+        cat.apps.forEach((app) => {
+          const card = document.createElement("a");
+          card.className = "app-card";
+          card.href = app.url;
+          card.target = "_blank"; // Открывать в новой вкладке
+          card.rel = "noopener noreferrer";
+
+          card.innerHTML = `
+            <img class="app-icon" src="${app.icon}" alt="${app.name}" onerror="this.src='https://placehold.co/42x42/transparent/38bdf8?text=App'">
+            <span class="app-name">${app.name}</span>
+          `;
+
+          content.appendChild(card);
+        });
+
+        catDiv.appendChild(header);
+        catDiv.appendChild(content);
+        catalogContainer.appendChild(catDiv);
+      });
+    }
+
+    // Запуск генерации элементов при загрузке страницы
+    document.addEventListener("DOMContentLoaded", renderCatalog);
+  </script>
+
+</body>
+</html>
